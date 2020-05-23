@@ -1,0 +1,3 @@
+bind = '0.0.0.0:8000'
+TIMEOUT = 240
+NUM_WORKERS = 3

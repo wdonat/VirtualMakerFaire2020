@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Maker Faire 2020</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="static/styles/styles.css" />
+    <script src="static/scripts/server-communication.js"></script>
+  </head>
+  <script>
+    
+
+    // ---------------------
+    // - Retrieve Readings -
+    // ---------------------
+
+    var g_currentStateInfo = null;
+    var g_currentStateTimer = null;
+
+    function getCurrentReadings()
+    {
+      let command = "getCurrentReadings";
+      postToServer(command, { }, processGetCurrentReadingsResponse);
+
+      return true;
+    }
+
+    function processGetCurrentReadingsResponse(response)
+    {
+      if (response.responseCode == "1")
+      {
+        g_currentStateInfo = convertCurrentStateServerResponseToLocalData(response.data);
+      }
+
+      updateRealTimeDisplay();
+
+    }
+
+    function convertCurrentStateServerResponseToLocalData(response)
+    {
+      let localData = 
+      {
+        variableOne:
+        {
+          timePeriod: response.variable_one.time_period,
+          overallMin: response.variable_one.overall_min,
+          overallMax: response.variable_one.overall_max,
+          dataPoints: response.variable_one.data_points
+        },
+        variableTwo:
+        {
+          timePeriod: response.variable_two.time_period,
+          overallMin: response.variable_two.overall_min,
+          overallMax: response.variable_two.overall_max,
+          dataPoints: response.variable_two.data_points
+        },
+        variableThree:
+        {
+          timePeriod: response.variable_three.time_period,
+          overallMin: response.variable_three.overall_min,
+          overallMax: response.variable_three.overall_max,
+          dataPoints: response.variable_three.data_points
+        }
+      };
+      return localData;
+    }
+
+    function updateRealTimeDisplay()
+    {
+      // Draw Graphs
+
+      drawVariableOne();
+      drawVariableTwo();
+      drawVariableThree();
+    }
+
+
+/* ----------------- */
+/* - GRAPH DRAWING - */
+/* ----------------- */
+
+function drawVariableOne()
+{
+  const graphObject = g_currentStateInfo["variableOne"];
+  const canvasElement = document.getElementById("cvsDisplayVariableOne");
+
+  if(graphObject == null || canvasElement == null)
+  {
+    return false;
+  }
+
+  const timePeriod = graphObject.timePeriod;
+  const overallMin = graphObject.overallMin;
+  const overallMax = graphObject.overallMax;
+  const dataPoints = graphObject.dataPoints;
+  const numOfDataPoints = dataPoints.length;
+
+  const lineColor = "ebfa1b";
+  const lineWidth = 2;
+  const originX = 5;
+  const yFloor = 85;
+  const yCeil = 5;
+  const graphWidth = 745;
+  const graphHeight = 85;
+  const graphTotalWidth = 750;
+  const graphTotalHeight = 90;
+
+  const ctx = canvasElement.getContext("2d");
+  ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+
+  // Trace graph
+  let yPixelRange = yFloor - yCeil;
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = "#" + lineColor;
+  ctx.lineWidth = lineWidth;
+
+  let timeOffset = dataPoints[0][0];
+  dataPointsConverted = dataPoints.map( dataPoint => [ originX + 1 + ((dataPoint[0] - timeOffset)/timePeriod) * graphWidth, yFloor - ((dataPoint[1] - overallMin) / (overallMax - overallMin)) * yPixelRange])
+
+  ctx.beginPath();
+  ctx.moveTo(originX, yFloor);
+  ctx.moveTo(dataPointsConverted[0][0], dataPointsConverted[0][1]);
+
+  for(let i=1; i<numOfDataPoints; i++)
+  {
+    ctx.lineTo(dataPointsConverted[i][0], dataPointsConverted[i][1]);
+    //console.log(dataPointsConverted[i][0] + ", " + dataPointsConverted[i][1]);
+  }
+
+  ctx.stroke();
+}
+
+function drawVariableTwo()
+{
+  const graphObject = g_currentStateInfo["variableTwo"];
+  const canvasElement = document.getElementById("cvsDisplayVariableTwo");
+
+  if(graphObject == null || canvasElement == null)
+  {
+    return false;
+  }
+
+  const timePeriod = graphObject.timePeriod;
+  const overallMin = graphObject.overallMin;
+  const overallMax = graphObject.overallMax;
+  const dataPoints = graphObject.dataPoints;
+  const numOfDataPoints = dataPoints.length;
+
+  const lineColor = "09e80d";
+  const lineWidth = 2;
+  const originX = 5;
+  const yFloor = 85;
+  const yCeil = 5;
+  const graphWidth = 745;
+  const graphHeight = 85;
+  const graphTotalWidth = 750;
+  const graphTotalHeight = 90;
+
+  const ctx = canvasElement.getContext("2d");
+  ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+
+  // Trace graph
+  let yPixelRange = yFloor - yCeil;
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = "#" + lineColor;
+  ctx.lineWidth = lineWidth;
+
+  let timeOffset = dataPoints[0][0];
+  dataPointsConverted = dataPoints.map( dataPoint => [ originX + 1 + ((dataPoint[0] - timeOffset)/timePeriod) * graphWidth, yFloor - ((dataPoint[1] - overallMin) / (overallMax - overallMin)) * yPixelRange])
+
+  ctx.beginPath();
+  ctx.moveTo(originX, yFloor);
+  ctx.moveTo(dataPointsConverted[0][0], dataPointsConverted[0][1]);
+
+  for(let i=1; i<numOfDataPoints; i++)
+  {
+    ctx.lineTo(dataPointsConverted[i][0], dataPointsConverted[i][1]);
+  }
+
+  ctx.stroke();
+}
+
+function drawVariableThree()
+{
+  const graphObject = g_currentStateInfo["variableThree"];
+  const canvasElement = document.getElementById("cvsDisplayVariableThree");
+
+  if(graphObject == null || canvasElement == null)
+  {
+    return false;
+  }
+
+  const timePeriod = graphObject.timePeriod;
+  const overallMin = graphObject.overallMin;
+  const overallMax = graphObject.overallMax;
+  const dataPoints = graphObject.dataPoints;
+  const numOfDataPoints = dataPoints.length;
+
+  const lineColor = "1b4cfa";
+  const lineWidth = 2;
+  const originX = 5;
+  const yFloor = 85;
+  const yCeil = 5;
+  const graphWidth = 745;
+  const graphHeight = 85;
+  const graphTotalWidth = 750;
+  const graphTotalHeight = 90;
+
+  const ctx = canvasElement.getContext("2d");
+  ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+
+  // Trace graph
+  let yPixelRange = yFloor - yCeil;
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = "#" + lineColor;
+  ctx.lineWidth = lineWidth;
+
+  let timeOffset = dataPoints[0][0];
+  dataPointsConverted = dataPoints.map( dataPoint => [ originX + 1 + ((dataPoint[0] - timeOffset)/timePeriod) * graphWidth, yFloor - ((dataPoint[1] - overallMin) / (overallMax - overallMin)) * yPixelRange])
+
+  ctx.beginPath();
+  ctx.moveTo(originX, yFloor);
+  ctx.moveTo(dataPointsConverted[0][0], dataPointsConverted[0][1]);
+
+  for(let i=1; i<numOfDataPoints; i++)
+  {
+    ctx.lineTo(dataPointsConverted[i][0], dataPointsConverted[i][1]);
+  }
+
+  ctx.stroke();
+}
+
+  </script>
+  <body>
+    <div id="divMainContainer" class="container genericBackground relativeContainer">
+
+      <div id="divDisplayVariableOne" class="dataGraphDisplayContainer variableOne"> 
+        <canvas id="cvsDisplayVariableOne" width="725" height="90">
+        </canvas>
+        <div class="dataGraphDisplayTitle">Variable One</div>
+      </div>
+      <div id="divVariableOneRange" class="dataGraphRangeVariableOne">
+        <img src="static/images/pressure_range.png">
+      </div>
+
+
+      <div id="divDisplayVariableTwo" class="dataGraphDisplayContainer variableTwo"> 
+        <canvas id="cvsDisplayVariableTwo" width="725" height="90">
+        </canvas>
+        <div class="dataGraphDisplayTitle">Variable Two</div>
+      </div>
+      <div id="divVariableTwoRange" class="dataGraphRangeVariableTwo">
+        <img src="static/images/flow_range.png">
+      </div>
+
+
+      <div id="divDisplayVariableThree" class="dataGraphDisplayContainer variableThree"> 
+        <canvas id="cvsDisplayVariableThree" width="725" height="90">
+        </canvas>
+        <div class="dataGraphDisplayTitle">Variable Three</div>
+      </div>
+      <div id="divVariableThreeRange" class="dataGraphRangeVariableThree">
+        <img src="static/images/volume_range.png">
+      </div>
+     
+    
+<!-- BEGIN: Bottom Bar -->
+  <div class="bottomBar">
+    <div class="bottomBarElement"><img src="static/images/home.png"></div>
+    <div class="bottomBarElement"><img src="static/images/settings.png" class="clickable" onClick="clickedOnSettingsIcon();"></div>
+  </div>
+<!-- END: Bottom Bar -->
+
+    </div>
+
+    <script>
+      g_currentStateTimer = setInterval(getCurrentReadings, 150);
+
+    </script>  
+  </body>  
+</html>
